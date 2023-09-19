@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-in</title>
+</head>
+<body>
+
+    <h1>Google Sign-in</h1>
+    <hr>
+
+    <div id="g_id_onload"
+        data-client_id="810454050330-rldbh7dg1badmd94tglahd32v9tqcqoj.apps.googleusercontent.com"
+        data-auto_prompt="false"
+        data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+    </div>      
+
+    <button id="google_signout">Signout</button>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!--esta es la funcion que maneja las credenciales-->
+    <script>
+        function handleCredentialResponse(response) {
+
+            //google token: ID_TOKEN
+            //console.log('id_token',response.credential);
+            //esto genera el token donde tengo como objetivo poder enviarlo a mi back para que finalmente le de el permiso al usuario 
+            const body = {id_token:response.credential}
+            fetch('http://localhost:8080/api/auth/google',{
+                method:'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+                    .then(resp => resp.json())
+                    .then(resp =>  {
+                        console.log(resp)
+                        localStorage.setItem('email',resp.usuario.correo)
+                    })
+                    .catch(console.warn);
+        }
+        const button = document.getElementById('google_signout');
+        button.onclick = () => {
+            console.log(google.accounts.id)
+            google.accounts.id.disableAutoSelect()
+            //necesito tener el correo de la persona que se autentifico
+            localStorage.clear(); // hace la limpieza de cokkies para salir
+            location.reload(); //recarga la pagina
+        }
+        
+    </script>
+</body>
+</html>
